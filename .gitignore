@@ -1,0 +1,5 @@
+services/config/secrets
+services/node_modules
+.vagrant
+.DS_Store
+

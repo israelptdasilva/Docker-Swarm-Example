@@ -1,0 +1,89 @@
+version: '3.9'
+
+services:  
+  nginx:
+    image: nginx
+    container_name: nginx 
+    restart: always
+    ports:
+      - 3001:80
+      - 3002:443
+    environment:
+      APP_HOST: app
+    volumes:
+      - ./config/nginx/templates:/etc/nginx/templates
+    networks: 
+      - ingress
+      - services 
+    depends_on:
+      - app
+  
+  app:
+    build: ./app/.
+    container_name: products-app
+    command: npm run start 
+    restart: always
+    environment:
+      MYSQL_HOST: database 
+      MYSQL_DATABASE: products
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+    volumes:
+      - ./app:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - services
+    depends_on:
+      - database:
+          condition: service_healthy 
+      - cache:
+          condition: service_healthy
+
+  database:
+    image: mysql
+    container_name: products-db 
+    hostname: products-db 
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: products
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./config/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db:/home/lib/mysql
+    networks:
+      - services
+    healthcheck:
+      test: mysql -p$$MYSQL_ROOT_PASSWORD --silent -e "SHOW DATABASES;"
+      interval: 3s
+      timeout: 5s
+      retries: 10
+
+  cache:
+    image: redis
+    container_name: products-cache
+    entrypoint: redis-server
+    restart: unless-stopped
+    command: --save 60 1 --loglevel warning 
+    volumes:
+      - cache:/data
+    networks: 
+      - services 
+    healthcheck:
+      test: redis-cli ping
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+networks:
+  ingress:
+    driver: bridge
+  services:
+    driver: bridge
+
+volumes:
+  db:
+    driver: local
+  cache:
+    driver: local
