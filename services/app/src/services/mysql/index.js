@@ -12,7 +12,7 @@ function Database() {
 }
 
 Database.prototype.products = async function() {
-  const query = 'select * from products';
+  const query = 'select * from product';
   const result = await this.connection.execute(query);
   return result[0] ?? [];
 };

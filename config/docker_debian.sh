@@ -22,3 +22,14 @@ sudo apt-get update
 
 # install docker
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# daemon file to support Prometheus.
+cat > /etc/docker/daemon.json << EOF
+{
+  "metrics-addr" : "0.0.0.0:9323",
+  "experimental" : true
+}
+EOF
+
+# restart docker daemon with new configuration
+sudo service docker restart
