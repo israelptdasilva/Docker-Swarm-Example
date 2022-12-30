@@ -11,6 +11,10 @@ services:
         target: /etc/nginx/templates/default.conf.template
     environment:
       APP_HOST: app
+    deploy:
+      placement:
+        constraints:
+           - node.role==manager
     networks: 
       - services 
   
@@ -66,9 +70,10 @@ services:
 
   monitoring:
     image: prom/prometheus 
-    configs:
-      - source: config_prometheus
-        target: /tmp/prometheus.yml
+    volumes:
+      - ./config/prometheus/:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
       - 9090:9090
     networks:
@@ -84,14 +89,14 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - services
 
 configs:
   config_mysql:
     file: ./config/mysql/init.sql 
   config_nginx:
     file: ./config/nginx/templates/default.conf.template
-  config_prometheus:
-    file: ./config/prometheus/prometheus.yml
 
 secrets:
   secret_mysql_password:
