@@ -11,13 +11,9 @@ services:
         target: /etc/nginx/templates/default.conf.template
     environment:
       APP_HOST: app
-    deploy:
-      placement:
-        constraints:
-           - node.role==manager
     networks: 
       - services 
-  
+
   app:
     image: localhost:5000/app:latest
     command: ['./config/wait-for-it.sh', 'database', '--', './config/wait-for-it.sh', 'cache', '--', 'npm', 'start']
@@ -89,6 +85,36 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - services
+
+  node_exporter:
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.ignored-mount-points="^(/rootfs|/host|)/(sys|proc|dev|host|etc)($$|/)"'
+      - '--collector.filesystem.ignored-fs-types="^(sys|proc|auto|cgroup|devpts|ns|au|fuse\.lxc|mqueue)(fs|)$$"'
+    deploy:
+      placement:
+        constraints:
+         - node.hostname == manager
+    networks:
+      - services
+
+  grafana:
+    image: grafana/grafana
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - 3000:3000
     networks:
       - services
 
