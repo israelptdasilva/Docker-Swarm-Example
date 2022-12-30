@@ -107,16 +107,31 @@ services:
     networks:
       - services
 
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter
+    command:
+      - -nginx.scrape-uri=http://192.168.33.2:3001/metrics
+    ports:
+      - 9113:9113
+    deploy:
+      placement:
+        constraints:
+         - node.hostname == manager
+    networks:
+      - services
+
   grafana:
     image: grafana/grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana:/var/lib/grafana
+    networks:
+      - services
     deploy:
       placement:
         constraints:
           - node.role == manager
-    ports:
-      - 3000:3000
-    networks:
-      - services
 
 configs:
   config_mysql:
@@ -137,3 +152,4 @@ networks:
 volumes:
   db: {}
   cache: {}
+  grafana: {}
