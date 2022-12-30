@@ -1,5 +1,5 @@
 global:
-  scrape_interval:     15s .
+  scrape_interval: 15s 
   evaluation_interval: 15s  
   external_labels:
       monitor: 'codelab-monitor'
@@ -7,11 +7,11 @@ global:
 rule_files:
 scrape_configs:
   - job_name: 'prometheus'
-    
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'docker'
-
+  - job_name: 'cadvisor'
+    scrape_interval: 5s
     static_configs:
-      - targets: ['192.168.33.2:9323']
+      - targets:
+        - cadvisor: 8080
