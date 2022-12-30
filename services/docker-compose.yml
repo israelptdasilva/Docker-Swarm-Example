@@ -17,11 +17,13 @@ services:
   app:
     image: localhost:5000/app:latest
     command: ['./config/wait-for-it.sh', 'database', '--', './config/wait-for-it.sh', 'cache', '--', 'npm', 'start']
+    secrets:
+      - secret_mysql_password
     environment:
       MYSQL_HOST: database 
       MYSQL_DATABASE: products
       MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_PASSWORD: /run/secrets/secret_mysql_password 
       REDIS_HOST: cache
       REDIS_PORT: 6379
     networks:
@@ -33,9 +35,11 @@ services:
     configs:
       - source: config_mysql
         target: /docker-entrypoint-initdb.d/init.sql  
+    secrets:
+      - secret_mysql_password
     environment:
       MYSQL_DATABASE: products
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: /run/secrets/secret_mysql_password  
     volumes:
       - db:/home/lib/mysql
     networks:
@@ -77,6 +81,10 @@ configs:
     file: ./config/nginx/templates/default.conf.template
   config_prometheus:
     file: ./config/prometheus/prometheus.yml
+
+secrets:
+  secret_mysql_password:
+    file: ./secrets/mysql_password.txt
 
 networks:
   ingress:
