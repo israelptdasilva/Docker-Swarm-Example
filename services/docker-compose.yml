@@ -16,7 +16,7 @@ services:
 
   app:
     image: localhost:5000/app:latest
-    command: ['./config/wait-for-it.sh', 'database', '--', './config/wait-for-it.sh', 'cache', '--', 'npm', 'start']
+    command: ['./config/wait-for-it.sh', 'database', '--', './config/wait-for-it.sh', 'cache', '--', 'echo', 'ok']
     secrets:
       - secret_mysql_password
     environment:
