@@ -10,12 +10,12 @@ services:
       - source: config_nginx
         target: /etc/nginx/templates/default.conf.template
     environment:
-      APP_HOST: app
+      APP_HOST: api
     networks: 
       - services 
 
-  app:
-    image: localhost:5000/app:latest
+  api:
+    image: localhost:5000/api:latest
     command: ['./config/wait-for-it.sh', 'database', '--', './config/wait-for-it.sh', 'cache', '--', 'echo', 'ok']
     secrets:
       - secret_mysql_password

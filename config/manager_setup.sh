@@ -10,8 +10,8 @@ sudo docker service create \
   registry:2
 
 # Build and push service images to local registry
-APP_BUILD_CONTEXT=./services/app/.
-APP_IMAGE_NAME=$REGISTRY_HOST:$REGISTRY_PORT/app:latest
+APP_BUILD_CONTEXT=./services/api/.
+APP_IMAGE_NAME=$REGISTRY_HOST:$REGISTRY_PORT/api:latest
 sudo docker image build $APP_BUILD_CONTEXT --tag $APP_IMAGE_NAME
 sudo docker image push $APP_IMAGE_NAME
 
