@@ -10,6 +10,4 @@ RUN npm install
 
 COPY . .
 
-VOLUME /usr/src/api/
-
 ENTRYPOINT npm start
