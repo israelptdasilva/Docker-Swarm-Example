@@ -12,7 +12,7 @@ services:
     environment:
       APP_HOST: api
     networks: 
-      - services 
+      - public
 
   api:
     image: localhost:5000/api:latest
@@ -27,7 +27,8 @@ services:
       REDIS_HOST: cache
       REDIS_PORT: 6379
     networks:
-      - services
+      - public
+      - private
 
   database:
     image: mysql 
@@ -42,7 +43,7 @@ services:
     volumes:
       - db:/home/lib/mysql
     networks:
-      - services
+      - private
     healthcheck:
       test: mysql -p$$MYSQL_ROOT_PASSWORD --silent -e 'SHOW DATABASES;'
       interval: 3s
@@ -56,7 +57,7 @@ services:
     volumes:
       - cache:/data
     networks: 
-      - services 
+      - private
     healthcheck:
       test: redis-cli ping
       interval: 3s
@@ -72,7 +73,8 @@ services:
     ports:
       - 9090:9090
     networks:
-      - services
+      - public
+      - private
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -84,7 +86,8 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     networks:
-      - services
+      - public
+      - private
 
   node_exporter:
     image: prom/node-exporter
@@ -103,7 +106,8 @@ services:
         constraints:
          - node.hostname == manager
     networks:
-      - services
+      - public
+      - private
 
   nginx_exporter:
     image: nginx/nginx-prometheus-exporter
@@ -116,7 +120,8 @@ services:
         constraints:
          - node.hostname == manager
     networks:
-      - services
+      - public
+      - private
 
   grafana:
     image: grafana/grafana
@@ -125,7 +130,8 @@ services:
     volumes:
       - grafana:/var/lib/grafana
     networks:
-      - services
+      - public
+      - private
     deploy:
       placement:
         constraints:
@@ -142,10 +148,13 @@ secrets:
     file: ./secrets/mysql_password.txt
 
 networks:
-  ingress:
+  public:
     driver: overlay
-  services:
+  private:
     driver: overlay
+    internal: true
+    driver_opts:
+      encrypted: 1
 
 volumes:
   db: {}
